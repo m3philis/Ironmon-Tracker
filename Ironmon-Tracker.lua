@@ -41,6 +41,7 @@ dofile(DATA_FOLDER .. "/Tracker.lua")
 
 Main = {}
 Main.LoadNextSeed = false
+Main.LoadNewSeed = false
 
 -- Main loop
 function Main.Run()
@@ -106,13 +107,56 @@ function Main.Run()
 
 		event.onexit(Program.HandleExit, "HandleExit")
 
-		while Main.LoadNextSeed == false do
+		while (Main.LoadNextSeed == false) and (Main.LoadNewSeed == false) do
 			Program.main()
 			emu.frameadvance()
 		end
 
 		Main.LoadNext()
 	end
+end
+
+function Main.LoadNew()
+	userdata.clear()
+	print "Reset tracker"
+
+	if Settings.config.RANDO_JAR == nil then
+		print("RANDO_JAR unspecified. Set this in Settings.ini to automatically reseed ROM.")
+		Main.LoadNewSeed = false
+		Main.Run()
+		return
+	end
+	if Settings.config.RANDO_SETTINGS_FILE == nil then
+		print("RANDO_SETTINGS_FILE unspecified. Set this in Settings.ini to automatically reseed ROM.")
+		Main.LoadNewSeed = false
+		Main.Run()
+		return
+	end
+	if Settings.config.BASE_ROM == nil then
+		print("BASE_ROM unspecified. Set this in Settings.ini to automatically reseed ROM.")
+		Main.LoadNewSeed = false
+		Main.Run()
+		return
+	end
+	if Settings.config.ROMS_FOLDER == nil then
+		print("ROMS_FOLDER unspecified. Set this in Settings.ini to automatically reseed ROM.")
+		Main.LoadNewSeed = false
+		Main.Run()
+		return
+	end
+
+	os.execute(string.format("java -Xmx4096M -jar %s cli -i %s -o %s/%s -s %s -l", 
+		Settings.config.RANDO_JAR,
+		Settings.config.BASE_ROM,
+		Settings.config.ROMS_FOLDER,
+		gameinfo.getromname(),
+		Settings.config.RANDO_SETTINGS_FILE))
+
+	client.openrom(Settings.config.ROMS_FOLDER .. "\\" .. gameinfo.getromname() .. ".gba")
+
+	Main.LoadNewSeed = false
+
+	Main.Run()
 end
 
 function Main.LoadNext()
