@@ -59,6 +59,17 @@ function Input.update()
 		Main.LoadNextSeed = true
 	end
 
+	-- "Settings.controls.NEW_SEED"
+	local allPressed = true
+	for button in string.gmatch(Settings.controls.NEW_SEED, '([^,]+)') do
+		if joypadButtons[button] ~= true then
+			allPressed = false
+		end
+	end
+	if allPressed == true then
+		Main.LoadNewSeed = true
+	end
+	
 	-- "Settings.controls.CYCLE_PREDICTION" pressed, cycle stat prediction for selected stat
 	if joypadButtons[Settings.controls.CYCLE_PREDICTION] == true and Input.joypad[Settings.controls.CYCLE_PREDICTION] ~= joypadButtons[Settings.controls.CYCLE_PREDICTION] then
 		if Tracker.controller.framesSinceInput < Tracker.controller.boxVisibleFrames then
